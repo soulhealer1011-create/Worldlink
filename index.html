@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>WorldLink — Voting Link Helper</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131f32;--line:#263750;--text:#eef4ff;--muted:#9aabc3;--accent:#70e0bd}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0%,#1b3550 0,transparent 38%),var(--bg);font:16px system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);display:grid;place-items:center;padding:22px}
+main{width:min(100%,520px)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#70e0bd,#66a7ff);display:grid;place-items:center;color:#081522;font-weight:900;font-size:22px}.brand strong{font-size:21px;letter-spacing:.2px}.brand small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+h1{font-size:30px;line-height:1.15;margin:0 0 10px}.intro{color:var(--muted);line-height:1.55;margin:0 0 24px}.panel{background:rgba(19,31,50,.94);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 20px 60px #0004}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 9px;color:#dce8f8}input{width:100%;padding:15px 14px;border:1px solid #38506c;border-radius:12px;background:#0c1728;color:var(--text);font:inherit;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #70e0bd22}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}button{border:0;border-radius:12px;padding:13px 14px;font:700 14px system-ui;cursor:pointer}.primary{background:var(--accent);color:#092019}.secondary{background:#24364e;color:var(--text)}button:disabled{opacity:.45;cursor:not-allowed}.status{min-height:22px;color:var(--accent);font-size:13px;margin:12px 0 0}.saved{margin-top:18px;padding-top:17px;border-top:1px solid var(--line)}.saved-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.saved-head strong{font-size:14px}.saved-url{font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:0 0 12px}.note{font-size:12px;line-height:1.5;color:var(--muted);margin:18px 2px 0}.note b{color:#dbe7f8}.empty{font-size:13px;color:var(--muted);padding:10px 0}
+@media(max-width:380px){.actions{grid-template-columns:1fr}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<main>
+<header class="brand"><div class="logo">W</div><div><strong>WorldLink</strong><small>Your voting link companion</small></div></header>
+<h1>Keep your voting link close.</h1>
+<p class="intro">Paste a voting page link, save it on this device, and open it whenever you’re ready to cast a permitted vote.</p>
+<section class="panel" aria-label="Voting link manager">
+<label for="voteLink">Voting page URL</label>
+<input id="voteLink" type="url" inputmode="url" placeholder="https://example.com/vote" autocomplete="url">
+<div class="actions">
+<button class="primary" id="saveBtn">Save link</button>
+<button class="secondary" id="openBtn" disabled>Open voting page ↗</button>
+</div>
+<p class="status" id="status" role="status" aria-live="polite"></p>
+<div class="saved">
+<div class="saved-head"><strong>Saved voting link</strong><button class="secondary" id="clearBtn" style="padding:8px 11px;font-size:12px">Clear</button></div>
+<p class="saved-url" id="savedUrl">No link saved yet.</p>
+<div class="actions">
+<button class="secondary" id="copyBtn" disabled>Copy link</button>
+<button class="secondary" id="shareBtn" disabled>Share link</button>
+</div>
+</div>
+</section>
+<p class="note"><b>Fair-voting reminder:</b> WorldLink opens the official voting page; it does not submit votes automatically, create repeated votes, or bypass a site's limits. Follow the voting rules shown by the organiser. Your saved link stays in this browser on this device.</p>
+</main>
+<script>
+const input=document.getElementById('voteLink'),statusEl=document.getElementById('status'),savedUrl=document.getElementById('savedUrl');
+const buttons=['openBtn','copyBtn','shareBtn'].map(id=>document.getElementById(id));
+let saved='';
+function validUrl(value){try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='http:'?u:null}catch{return null}}
+function setSaved(value){saved=value;localStorage.setItem('worldlink-vote-url',value);savedUrl.textContent=value||'No link saved yet.';buttons.forEach(b=>b.disabled=!value);if(value)input.value=value}
+function announce(message){statusEl.textContent=message}
+const previous=localStorage.getItem('worldlink-vote-url');if(previous&&validUrl(previous))setSaved(previous);
+document.getElementById('saveBtn').addEventListener('click',()=>{const u=validUrl(input.value.trim());if(!u){announce('Please enter a valid http:// or https:// voting link.');return}setSaved(u.href);announce('Voting link saved on this device.')});
+document.getElementById('openBtn').addEventListener('click',()=>{if(saved)window.open(saved,'_blank','noopener,noreferrer')});
+document.getElementById('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(saved);announce('Link copied.')}catch{announce('Copy is unavailable in this browser; select the saved link to copy it.')}});
+document.getElementById('shareBtn').addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'My voting link',url:saved})}catch{}}else{try{await navigator.clipboard.writeText(saved);announce('Sharing is unavailable here; link copied instead.')}catch{announce('Sharing is not supported in this browser.')}}});
+document.getElementById('clearBtn').addEventListener('click',()=>{localStorage.removeItem('worldlink-vote-url');saved='';input.value='';savedUrl.textContent='No link saved yet.';buttons.forEach(b=>b.disabled=true);announce('Saved link cleared.')});
+</script>
+</body>
+</html>
