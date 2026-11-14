@@ -18,10 +18,11 @@ label{display:block;font-size:13px;font-weight:700;margin:0 0 9px;color:#dce8f8}
 <main>
 <header class="brand"><div class="logo">W</div><div><strong>WorldLink</strong><small>Your voting link companion</small></div></header>
 <h1>Keep your voting link close.</h1>
-<p class="intro">Paste a voting page link, save it on this device, and open it whenever you’re ready to cast a permitted vote.</p>
+<p class="intro">Save the official voting page, open it to cast your vote, and share the link with friends who want to support Sis Barbara.</p>
 <section class="panel" aria-label="Voting link manager">
 <label for="voteLink">Voting page URL</label>
 <input id="voteLink" type="url" inputmode="url" placeholder="https://example.com/vote" autocomplete="url">
+<button class="secondary" id="presetBtn" style="width:100%;margin-top:10px">Use Sis Barbara’s voting link</button>
 <div class="actions">
 <button class="primary" id="saveBtn">Save link</button>
 <button class="secondary" id="openBtn" disabled>Open voting page ↗</button>
@@ -36,12 +37,14 @@ label{display:block;font-size:13px;font-weight:700;margin:0 0 9px;color:#dce8f8}
 </div>
 </div>
 </section>
-<p class="note"><b>Fair-voting reminder:</b> WorldLink opens the official voting page; it does not submit votes automatically, create repeated votes, or bypass a site's limits. Follow the voting rules shown by the organiser. Your saved link stays in this browser on this device.</p>
+<p class="note"><b>Fair-voting reminder:</b> WorldLink does not submit votes automatically or create repeated votes. Open the official page and follow the organiser’s voting rules. You can share the page so other supporters can cast their own eligible votes. Your saved link stays in this browser on this device.</p>
 </main>
 <script>
 const input=document.getElementById('voteLink'),statusEl=document.getElementById('status'),savedUrl=document.getElementById('savedUrl');
 const buttons=['openBtn','copyBtn','shareBtn'].map(id=>document.getElementById(id));
 let saved='';
+const sisBarbaraLink='https://coalcitypraise.com/participants/sis-barbara';
+document.getElementById('presetBtn').addEventListener('click',()=>{input.value=sisBarbaraLink;announce('Sis Barbara’s official voting page is ready. Tap Save link.');});
 function validUrl(value){try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='http:'?u:null}catch{return null}}
 function setSaved(value){saved=value;localStorage.setItem('worldlink-vote-url',value);savedUrl.textContent=value||'No link saved yet.';buttons.forEach(b=>b.disabled=!value);if(value)input.value=value}
 function announce(message){statusEl.textContent=message}
